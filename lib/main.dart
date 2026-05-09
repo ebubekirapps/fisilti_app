@@ -1,3 +1,4 @@
+import 'models/app_user.dart';
 import 'models/post.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -28,26 +29,6 @@ const List<String> kContentTypes = [
   "İtiraf",
   "Tavsiye İstiyorum",
 ];
-
-class AppUser {
-  String nickname;
-  String? gender;
-  String? profileImagePath;
-  String bio;
-
-  AppUser({
-    required this.nickname,
-    required this.gender,
-    required this.profileImagePath,
-    this.bio = "",
-  });
-}
-
-class UserSetupData {
-  String nickname = "";
-  String? gender;
-  String? profileImagePath;
-}
 
 class ChatRequest {
   final String id;
@@ -102,20 +83,6 @@ class ChatThread {
 
   String get lastMessage =>
       messages.isEmpty ? "Henüz mesaj yok." : messages.last.text;
-}
-
-class EditProfileResult {
-  final String nickname;
-  final String? gender;
-  final String? profileImagePath;
-  final String bio;
-
-  EditProfileResult({
-    required this.nickname,
-    required this.gender,
-    required this.profileImagePath,
-    required this.bio,
-  });
 }
 
 class ContentModerator {
