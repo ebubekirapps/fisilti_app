@@ -1,3 +1,4 @@
+import 'models/post.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
