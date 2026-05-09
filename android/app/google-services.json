@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "290380500439",
+    "project_id": "fisilti-app-e85aa",
+    "storage_bucket": "fisilti-app-e85aa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290380500439:android:b4e030f9ed1491e8e64f92",
+        "android_client_info": {
+          "package_name": "com.example.fisilti_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpT8_nP4r7Cyb54VT7A0R3DGkbXONXOug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
