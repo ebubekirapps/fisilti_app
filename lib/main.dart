@@ -1,3 +1,5 @@
+import 'widgets/user_avatar.dart';
+import 'package:flutter/material.dart';
 import 'utils/app_helpers.dart';
 import 'models/chat.dart';
 import 'models/app_user.dart';
@@ -2994,30 +2996,6 @@ class PrimaryButton extends StatelessWidget {
         onPressed: onPressed,
         child: Text(text),
       ),
-    );
-  }
-}
-
-class UserAvatar extends StatelessWidget {
-  final String? imagePath;
-  final double radius;
-
-  const UserAvatar({
-    super.key,
-    required this.imagePath,
-    this.radius = 20,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = fileImageProvider(imagePath);
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: Colors.white12,
-      backgroundImage: provider,
-      child: provider == null
-          ? Icon(Icons.person, size: radius, color: Colors.white)
-          : null,
     );
   }
 }
