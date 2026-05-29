@@ -1,9 +1,3 @@
-import 'widgets/user_avatar.dart';
-import 'package:flutter/material.dart';
-import 'utils/app_helpers.dart';
-import 'models/chat.dart';
-import 'models/app_user.dart';
-import 'models/post.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -11,6 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+
+import 'models/app_user.dart';
+import 'models/chat.dart';
+import 'models/post.dart';
+import 'utils/app_helpers.dart';
+import 'widgets/stat_card.dart';
+import 'widgets/tag_widget.dart';
+import 'widgets/user_avatar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -1067,9 +1069,9 @@ class _MainShellState extends State<MainShell> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
-                  _Tag(text: post.category),
+                  TagWidget(text: post.category),
                   const SizedBox(width: 8),
-                  _Tag(text: post.type),
+                  TagWidget(text: post.type),
                 ],
               ),
               const SizedBox(height: 14),
@@ -1421,9 +1423,9 @@ class PostCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      _Tag(text: post.category),
+                      TagWidget(text: post.category),
                       const SizedBox(width: 8),
-                      _Tag(text: post.type),
+                      TagWidget(text: post.type),
                     ],
                   ),
                 ),
@@ -1618,9 +1620,9 @@ class _CommentsPageState extends State<CommentsPage> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    _Tag(text: widget.post.category),
+                    TagWidget(text: widget.post.category),
                     const Spacer(),
-                    _Tag(text: widget.post.type),
+                    TagWidget(text: widget.post.type),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -2281,9 +2283,9 @@ class MyPostsPage extends StatelessWidget {
                               style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
-                          _Tag(text: post.category),
+                          TagWidget(text: post.category),
                           const SizedBox(width: 8),
-                          _Tag(text: post.type),
+                          TagWidget(text: post.type),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -3262,27 +3264,6 @@ class _BottomActionItem extends StatelessWidget {
   }
 }
 
-class _Tag extends StatelessWidget {
-  final String text;
-
-  const _Tag({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white12,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 13, color: Colors.white70),
-      ),
-    );
-  }
-}
-
 class UnreadCommentBadgeIcon extends StatelessWidget {
   final int count;
 
@@ -3327,47 +3308,6 @@ class UnreadCommentBadgeIcon extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final VoidCallback? onTap;
-
-  const StatCard({
-    super.key,
-    required this.title,
-    required this.value,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade900,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style:
-                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: const TextStyle(color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
