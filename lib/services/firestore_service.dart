@@ -19,4 +19,32 @@ class FirestoreService {
 
     debugPrint("Firestore'a yazma tamamlandi");
   }
+  Stream<List<Post>> watchPosts() {
+    return _db
+        .collection('posts')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+
+        return Post(
+          id: data['id'] ?? doc.id,
+          content: data['content'] ?? '',
+          category: data['category'] ?? 'Günlük Yaşam',
+          type: data['type'] ?? 'Dert',
+          nickname: data['nickname'] ?? '@anonim',
+          createdAt: (data['createdAt'] as Timestamp).toDate(),
+        );
+      }).toList();
+    });
+  }
+
+  Future<void> deletePost(String postId) async {
+    debugPrint("Firestore post silme basladi: $postId");
+
+    await _db.collection('posts').doc(postId).delete();
+
+    debugPrint("Firestore post silme tamamlandi");
+  }
 }
