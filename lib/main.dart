@@ -1939,11 +1939,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
       backgroundImagePath: selectedBackgroundImagePath,
     );
 
-    // try {
-//   await FirestoreService().addPost(newPost);
-// } catch (e) {
-//   debugPrint("Firestore post kaydetme hatası: $e");
-// }
+    try {
+  await FirestoreService().addPost(newPost);
+} catch (e) {
+  debugPrint("Firestore post kaydetme hatasi: $e");
+}
 
     if (!mounted) return;
     Navigator.pop(context, newPost);
