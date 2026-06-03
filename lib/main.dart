@@ -1004,44 +1004,56 @@ class _MainShellState extends State<MainShell> {
   }
 
   Widget buildHomeTab() {
-    final displayedPosts = filteredPosts;
+  return StreamBuilder<List<Post>>(
+    stream: FirestoreService().watchPosts(),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
 
-    return Column(
-      children: [
-        buildHeader(),
-        buildFilters(),
-        Expanded(
-          child: displayedPosts.isEmpty
-              ? const Center(
-                  child: Text(
-                    "Bu filtrede paylaşım bulunamadı.",
-                    style: TextStyle(color: Colors.white70),
+      final displayedPosts = snapshot.data!;
+
+      return Column(
+        children: [
+          buildHeader(),
+          buildFilters(),
+          Expanded(
+            child: displayedPosts.isEmpty
+                ? const Center(
+                    child: Text(
+                      "Bu filtrede paylaşım bulunamadı.",
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  )
+                : PageView.builder(
+                    controller: pageController,
+                    scrollDirection: Axis.vertical,
+                    itemCount: displayedPosts.length,
+                    onPageChanged: (index) {
+                      setState(() => currentPageIndex = index);
+                    },
+                    itemBuilder: (context, index) {
+                      final post = displayedPosts[index];
+                      final author = users[post.nickname] ?? currentUser;
+
+                      return PostCard(
+                        post: post,
+                        author: author,
+                        onCommentTap: () => openCommentsPage(post),
+                        onLikeTap: () => togglePostLike(post),
+                        onPassTap: goToNextPost,
+                        onShareTap: () => showShareSheet(context, post, author),
+                      );
+                    },
                   ),
-                )
-              : PageView.builder(
-                  controller: pageController,
-                  scrollDirection: Axis.vertical,
-                  itemCount: displayedPosts.length,
-                  onPageChanged: (index) {
-                    setState(() => currentPageIndex = index);
-                  },
-                  itemBuilder: (context, index) {
-                    final post = displayedPosts[index];
-                    final author = users[post.nickname]!;
-                    return PostCard(
-                      post: post,
-                      author: author,
-                      onCommentTap: () => openCommentsPage(post),
-                      onLikeTap: () => togglePostLike(post),
-                      onPassTap: goToNextPost,
-                      onShareTap: () => showShareSheet(context, post, author),
-                    );
-                  },
-                ),
-        ),
-      ],
-    );
-  }
+          ),
+        ],
+      );
+    },
+  );
+}
 
   Widget buildFavoritesTab() {
     if (favoritePosts.isEmpty) {
@@ -1439,21 +1451,37 @@ class PostCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    post.content,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      height: 1.42,
-                    ),
-                  ),
-                ),
-                const Spacer(),
+                Expanded(
+  child: Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            post.content,
+            maxLines: 8,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+              height: 1.42,
+            ),
+          ),
+
+          if (post.content.length > 300)
+            TextButton(
+              onPressed: onCommentTap,
+              child: const Text("Devamını Oku"),
+            ),
+        ],
+      ),
+    ),
+  ),
+),
+                
                 Padding(
                   padding: const EdgeInsets.fromLTRB(14, 0, 14, 20),
                   child: Row(
@@ -1603,7 +1631,8 @@ class _CommentsPageState extends State<CommentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final postAuthor = widget.users[widget.post.nickname]!;
+    final postAuthor =
+    widget.users[widget.post.nickname] ?? widget.currentUser;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -1636,11 +1665,18 @@ class _CommentsPageState extends State<CommentsPage> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  widget.post.content,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 18, height: 1.4),
-                ),
+                ConstrainedBox(
+  constraints: const BoxConstraints(
+    maxHeight: 180,
+  ),
+  child: SingleChildScrollView(
+    child: Text(
+      widget.post.content,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontSize: 18, height: 1.4),
+    ),
+  ),
+),
               ],
             ),
           ),
@@ -2004,7 +2040,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
           TextField(
             controller: controller,
             maxLines: 6,
-            maxLength: 300,
+            maxLength: 1500,
             decoration: InputDecoration(
               hintText: "İçinde ne varsa yaz...",
               border: OutlineInputBorder(
