@@ -19,6 +19,7 @@ class FirestoreService {
 
     debugPrint("Firestore'a yazma tamamlandi");
   }
+
   Stream<List<Post>> watchPosts() {
     return _db
         .collection('posts')
@@ -46,5 +47,28 @@ class FirestoreService {
     await _db.collection('posts').doc(postId).delete();
 
     debugPrint("Firestore post silme tamamlandi");
+  }
+
+  Future<void> addComment({
+    required String postId,
+    required String commentId,
+    required String content,
+    required String nickname,
+    String? parentCommentId,
+  }) async {
+    await _db
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .doc(commentId)
+        .set({
+      'id': commentId,
+      'postId': postId,
+      'content': content,
+      'nickname': nickname,
+      'parentCommentId': parentCommentId,
+      'createdAt': Timestamp.now(),
+      'likeCount': 0,
+    });
   }
 }
