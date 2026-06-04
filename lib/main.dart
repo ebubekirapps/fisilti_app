@@ -1436,7 +1436,7 @@ class PostCard extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          author.nickname,
+                          post.nickname,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -1598,37 +1598,48 @@ class _CommentsPageState extends State<CommentsPage> {
   }
 
   Future<void> submitComment() async {
-    final text = controller.text.trim();
-    if (text.isEmpty) return;
+  final text = controller.text.trim();
+  if (text.isEmpty) return;
 
-    if (ContentModerator.containsProfanity(text)) {
-      await showWarningPopup(
-        context,
-        "Bu içerik topluluk kurallarına uygun değil. Lütfen daha uygun bir ifade kullan.",
-      );
-      return;
-    }
-
-    final target =
-        replyingTo == null ? widget.post.nickname : replyingTo!.nickname;
-
-    setState(() {
-      widget.post.comments.add(
-        Comment(
-          id: DateTime.now().microsecondsSinceEpoch.toString(),
-          postId: widget.post.id,
-          content: text,
-          nickname: widget.currentUser.nickname,
-          replyTargetNickname: target,
-          parentCommentId: replyingTo?.id,
-        ),
-      );
-      widget.post.unreadCommentCount += 1;
-      controller.clear();
-      replyingTo = null;
-    });
+  if (ContentModerator.containsProfanity(text)) {
+    await showWarningPopup(
+      context,
+      "Bu içerik topluluk kurallarına uygun değil. Lütfen daha uygun bir ifade kullan.",
+    );
+    return;
   }
 
+  final target =
+      replyingTo == null ? widget.post.nickname : replyingTo!.nickname;
+
+  final newComment = Comment(
+    id: DateTime.now().microsecondsSinceEpoch.toString(),
+    postId: widget.post.id,
+    content: text,
+    nickname: widget.currentUser.nickname,
+    replyTargetNickname: target,
+    parentCommentId: replyingTo?.id,
+  );
+
+  try {
+    await FirestoreService().addComment(
+      postId: widget.post.id,
+      commentId: newComment.id,
+      content: newComment.content,
+      nickname: newComment.nickname,
+      parentCommentId: newComment.parentCommentId,
+    );
+  } catch (e) {
+    debugPrint("Firestore yorum kaydetme hatasi: $e");
+  }
+
+  setState(() {
+    widget.post.comments.add(newComment);
+    widget.post.unreadCommentCount += 1;
+    controller.clear();
+    replyingTo = null;
+  });
+}
   @override
   Widget build(BuildContext context) {
     final postAuthor =
