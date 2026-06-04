@@ -1460,7 +1460,7 @@ class PostCard extends StatelessWidget {
         children: [
           Text(
             post.content,
-            maxLines: 8,
+            maxLines: 5,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: const TextStyle(
@@ -1471,7 +1471,7 @@ class PostCard extends StatelessWidget {
             ),
           ),
 
-          if (post.content.length > 300)
+          if (post.content.length > 180)
             TextButton(
               onPressed: onCommentTap,
               child: const Text("Devamını Oku"),

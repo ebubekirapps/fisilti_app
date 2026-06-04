@@ -50,25 +50,29 @@ class FirestoreService {
   }
 
   Future<void> addComment({
-    required String postId,
-    required String commentId,
-    required String content,
-    required String nickname,
-    String? parentCommentId,
-  }) async {
-    await _db
-        .collection('posts')
-        .doc(postId)
-        .collection('comments')
-        .doc(commentId)
-        .set({
-      'id': commentId,
-      'postId': postId,
-      'content': content,
-      'nickname': nickname,
-      'parentCommentId': parentCommentId,
-      'createdAt': Timestamp.now(),
-      'likeCount': 0,
-    });
-  }
+  required String postId,
+  required String commentId,
+  required String content,
+  required String nickname,
+  String? parentCommentId,
+}) async {
+  debugPrint("Firestore yorum yazma basladi");
+
+  await _db
+      .collection('posts')
+      .doc(postId)
+      .collection('comments')
+      .doc(commentId)
+      .set({
+    'id': commentId,
+    'postId': postId,
+    'content': content,
+    'nickname': nickname,
+    'parentCommentId': parentCommentId,
+    'createdAt': Timestamp.now(),
+    'likeCount': 0,
+  }).timeout(const Duration(seconds: 8));
+
+  debugPrint("Firestore yorum yazma tamamlandi");
+}
 }
