@@ -1664,7 +1664,7 @@ class _CommentsPageState extends State<CommentsPage> {
                 UserAvatar(imagePath: postAuthor.profileImagePath, radius: 28),
                 const SizedBox(height: 10),
                 Text(
-                  postAuthor.nickname,
+                  widget.post.nickname,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 12),
