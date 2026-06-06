@@ -1699,61 +1699,103 @@ class _CommentsPageState extends State<CommentsPage> {
                       style: TextStyle(color: Colors.white70),
                     ),
                   )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: rootComments.length,
-                    itemBuilder: (context, index) {
-                      final comment = rootComments[index];
-                      final replies = repliesOf(comment.id);
-                      final commentAuthor = widget.users[comment.nickname]!;
+                : Expanded(
+  child: StreamBuilder<List<Map<String, dynamic>>>(
+    stream: FirestoreService().watchComments(widget.post.id),
+    builder: (context, snapshot) {
+      if (!snapshot.hasData) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
 
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CommentCard(
-                            comment: comment,
-                            author: commentAuthor,
-                            onLike: () => toggleLike(comment),
-                            onReply: () => startReply(comment),
-                            showChatRequest: widget.isPostOwner &&
-                                comment.nickname != widget.currentUser.nickname &&
-                                widget.canSendChatRequestTo(comment.nickname),
-                            onChatRequest: () {
-                              widget.onSendChatRequest(comment.nickname);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "${comment.nickname} kullanıcısına sohbet isteği gönderildi.",
-                                  ),
-                                ),
-                              );
-                              setState(() {});
-                            },
-                          ),
-                          if (replies.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 28),
-                              child: Column(
-                                children: replies.map((reply) {
-                                  final replyAuthor =
-                                      widget.users[reply.nickname]!;
-                                  return CommentCard(
-                                    comment: reply,
-                                    author: replyAuthor,
-                                    onLike: () => toggleLike(reply),
-                                    onReply: () => startReply(reply),
-                                    isReply: true,
-                                    showChatRequest: false,
-                                    onChatRequest: null,
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          const SizedBox(height: 8),
-                        ],
+      final comments = snapshot.data!.map((data) {
+        return Comment(
+          id: data['id'] ?? '',
+          postId: data['postId'] ?? widget.post.id,
+          content: data['content'] ?? '',
+          nickname: data['nickname'] ?? '@anonim',
+          replyTargetNickname: widget.post.nickname,
+          parentCommentId: data['parentCommentId'],
+          likeCount: data['likeCount'] ?? 0,
+        );
+      }).toList();
+
+      final rootComments =
+          comments.where((c) => c.parentCommentId == null).toList();
+
+      List<Comment> repliesOf(String parentId) =>
+          comments.where((c) => c.parentCommentId == parentId).toList();
+
+      if (rootComments.isEmpty) {
+        return const Center(
+          child: Text(
+            "Henüz yorum yok.",
+            style: TextStyle(color: Colors.white70),
+          ),
+        );
+      }
+
+      return ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: rootComments.length,
+        itemBuilder: (context, index) {
+          final comment = rootComments[index];
+          final replies = repliesOf(comment.id);
+          final commentAuthor =
+              widget.users[comment.nickname] ?? widget.currentUser;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CommentCard(
+                comment: comment,
+                author: commentAuthor,
+                onLike: () => toggleLike(comment),
+                onReply: () => startReply(comment),
+                showChatRequest: widget.isPostOwner &&
+                    comment.nickname != widget.currentUser.nickname &&
+                    widget.canSendChatRequestTo(comment.nickname),
+                onChatRequest: () {
+                  widget.onSendChatRequest(comment.nickname);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        "${comment.nickname} kullanıcısına sohbet isteği gönderildi.",
+                      ),
+                    ),
+                  );
+                  setState(() {});
+                },
+              ),
+              if (replies.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 28),
+                  child: Column(
+                    children: replies.map((reply) {
+                      final replyAuthor =
+                          widget.users[reply.nickname] ?? widget.currentUser;
+
+                      return CommentCard(
+                        comment: reply,
+                        author: replyAuthor,
+                        onLike: () => toggleLike(reply),
+                        onReply: () => startReply(reply),
+                        isReply: true,
+                        showChatRequest: false,
+                        onChatRequest: null,
                       );
-                    },
+                    }).toList(),
                   ),
+                ),
+              const SizedBox(height: 8),
+            ],
+          );
+        },
+      );
+    },
+  ),
+),
           ),
           if (replyingTo != null)
             Container(

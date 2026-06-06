@@ -55,7 +55,20 @@ class FirestoreService {
   required String content,
   required String nickname,
   String? parentCommentId,
-}) async {
+}) 
+Stream<List<Map<String, dynamic>>> watchComments(String postId) {
+  return _db
+      .collection('posts')
+      .doc(postId)
+      .collection('comments')
+      .orderBy('createdAt')
+      .snapshots()
+      .map((snapshot) {
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  });
+}
+
+async {
   debugPrint("Firestore yorum yazma basladi");
 
   await _db
